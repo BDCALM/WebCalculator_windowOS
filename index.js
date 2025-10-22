@@ -304,7 +304,7 @@
                     */
 
                     menuPanel.classList.add('hidden');
-                    alert(`Switched to ${newMode} mode. UI for this mode needs to be implemented.`);
+                    alert(`Switched to ${newMode} mode. UI for this mode has not been implemented yet.`);
                     // In a real app, you would dynamically change the calculator's button layout here.
                 });
             });
