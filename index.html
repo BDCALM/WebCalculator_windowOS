@@ -150,16 +150,14 @@
                     previousOperandEl.innerText = '';
                 }
 
-                // --- PHẦN LOGIC MỚI ĐƯỢC THÊM VÀO ---
+                // --- PHẦN LOGIC MỚI ĐƯỢC THAY ĐỔI ---
                 const num = parseFloat(currentOperand);
                 
-                // Hàm isFinite() trả về false cho Infinity, -Infinity và NaN.
-                // Chúng ta chỉ muốn vô hiệu hóa nút khi là Infinity,
-                // nên cần thêm điều kiện !isNaN(num) để loại trừ trường hợp màn hình trống (là NaN).
+                // Kiểm tra nếu số là Infinity hoặc -Infinity
                 if (!isFinite(num) && !isNaN(num)) {
-                    toggleOperatorButtons(true); // Vô hiệu hóa các nút toán tử
+                    updateButtonStates('infinity'); // Chuyển sang trạng thái khóa "vô cực"
                 } else {
-                    toggleOperatorButtons(false); // Kích hoạt lại các nút
+                    updateButtonStates('normal'); // Chuyển về trạng thái hoạt động bình thường
                 }
             };
 
@@ -347,21 +345,25 @@
                 historyPanel.classList.toggle('flex');
             });
             //Toggle buttons to avoid the user clicking number buttons when current number is Inf
-            const toggleOperatorButtons = (disabled) => {
-                // Chọn tất cả các nút là toán tử hoặc có chức năng tính toán đặc biệt
+            /**
+             * Cập nhật trạng thái (bật/tắt) của các nút trên máy tính.
+             * @param {string} state - Trạng thái mong muốn: 'infinity' (khóa) hoặc 'normal' (bình thường).
+             */
+            const updateButtonStates = (state) => {
+                // Sử dụng CSS selector :not() để chọn tất cả các nút <button>
+                // NGOẠI TRỪ nút có data-action="clear" và data-action="clear-entry"
                 const buttonsToToggle = document.querySelectorAll(
-                    '[data-operator], [data-action="equals"], [data-action="percent"], [data-action="reciprocal"], [data-action="square"], [data-action="sqrt"], [data-action="negate"], [data-action="back-space"]'
+                    'button:not([data-action="clear"]):not([data-action="clear-entry"])'
                 );
 
+                const shouldDisable = (state === 'infinity');
+
                 buttonsToToggle.forEach(button => {
-                    // Vô hiệu hóa hoặc kích hoạt lại nút
-                    button.disabled = disabled;
+                    button.disabled = shouldDisable;
                     
-                    if (disabled) {
-                        // Thêm class của Tailwind để làm mờ nút và đổi kiểu con trỏ
+                    if (shouldDisable) {
                         button.classList.add('opacity-50', 'cursor-not-allowed');
                     } else {
-                        // Xóa các class đó để nút trở lại bình thường
                         button.classList.remove('opacity-50', 'cursor-not-allowed');
                     }
                 });
