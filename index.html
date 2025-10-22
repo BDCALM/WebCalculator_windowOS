@@ -60,16 +60,28 @@
 
                 <div class="text-right mb-4">
                     <div id="previous-operand" class="text-gray-600 dark:text-gray-400 text-2xl h-14 overflow-hidden truncate"></div>
-                    <div id="current-operand" class="text-gray-900 dark:text-gray-100 text-6xl font-bold h-14 flex items-end justify-end overflow-hidden break-all">0</div>
+                    <div class="relative text-gray-900 dark:text-gray-100 text-6xl font-bold h-20 flex items-end justify-end overflow-hidden break-all">
+                    <span id="memory-indicator" class="absolute left-2 top-2 text-lg font-normal text-gray-600 dark:text-gray-400"></span>
+                    <div id="current-operand">0</div>
                 </div>
-
+                </div>
+                <!--Memory buttons-->
+                <div class="grid grid-cols-5 gap-2 mb-2">
+                    <button class="btn-op p-3 text-lg rounded-md bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 dark:text-gray-100" data-action="memory-clear">MC</button>
+                    <button class="btn-op p-3 text-lg rounded-md bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 dark:text-gray-100" data-action="memory-recall">MR</button>
+                    <button class="btn-op p-3 text-lg rounded-md bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 dark:text-gray-100" data-action="memory-add">M+</button>
+                    <button class="btn-op p-3 text-lg rounded-md bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 dark:text-gray-100" data-action="memory-subtract">M-</button>
+                    <button class="btn-op p-3 text-lg rounded-md bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 dark:text-gray-100" data-action="memory-store">MS</button>
+                </div>
                 <div class="grid grid-cols-4 gap-2">
+                    
                     <!--Operator and special buttons-->
                     <button class="btn-op p-4 text-2xl rounded-md bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100" data-action="percent">%</button>
                     <button class="btn-op p-4 text-2xl rounded-md bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100" data-action="clear-entry">CE</button>
                     <button class="btn-op p-4 text-2xl rounded-md bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100" data-action="clear">C</button>
                     <button class="btn-op p-4 text-2xl rounded-md bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100" data-action="backspace"><i class="fas fa-backspace"></i></button>
-
+                    
+                   <!--Special Operator buttons-->
                     <button class="btn-op p-4 text-2xl rounded-md bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100" data-action="reciprocal">¹/x</button>
                     <button class="btn-op p-4 text-2xl rounded-md bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100" data-action="square">x²</button>
                     <button class="btn-op p-4 text-2xl rounded-md bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100" data-action="sqrt">²√x</button>

@@ -10,17 +10,21 @@
             const historyContentEl = document.getElementById('history-content');
             const clearHistoryButton = document.getElementById('clear-history-button');
 
+            const memoryIndicatorEl = document.getElementById('memory-indicator'); //For Memory function
+            const memoryContentEl = document.getElementById('memory-content');
+
             // Các biến trạng thái - "bộ nhớ tạm" của máy tính
             let currentOperand = '';    // Số đang được nhập hoặc kết quả của phép tính
             let previousOperand = '';   // Số hạng đầu tiên của phép tính
             let operation = undefined;  // Phép toán được chọn (+, -, *, /)
-
+            // Thêm dòng này vào ngay dưới `let resultDisplayed = false;`
+            let memoryValue = 0;
             // *** BIẾN QUAN TRỌNG: Đánh dấu kết quả vừa được hiển thị ***
             // Giúp giải quyết vấn đề: sau khi có kết quả, bấm số mới sẽ bắt đầu phép tính mới.
             let resultDisplayed = false;
 
+            // Thay thế hàm updateDisplay cũ bằng hàm này
             const updateDisplay = () => {
-                // --- Phần này vẫn như cũ ---
                 currentOperandEl.innerText = formatNumber(currentOperand) || '0';
                 if (operation != null) {
                     previousOperandEl.innerText = `${formatNumber(previousOperand)} ${getDisplayOperator(operation)}`;
@@ -28,14 +32,20 @@
                     previousOperandEl.innerText = '';
                 }
 
-                // --- PHẦN LOGIC MỚI ĐƯỢC THAY ĐỔI ---
-                const num = parseFloat(currentOperand);
-                
-                // Kiểm tra nếu số là Infinity hoặc -Infinity
-                if (!isFinite(num) && !isNaN(num)) {
-                    updateButtonStates('infinity'); // Chuyển sang trạng thái khóa "vô cực"
+                if (memoryValue !== 0) {
+                    memoryIndicatorEl.innerText = 'M';
                 } else {
-                    updateButtonStates('normal'); // Chuyển về trạng thái hoạt động bình thường
+                    memoryIndicatorEl.innerText = '';
+                }
+                
+                // DÒNG MỚI ĐƯỢC THÊM VÀO ĐỂ CẬP NHẬT TAB MEMORY
+                updateMemoryPanel();
+
+                const num = parseFloat(currentOperand);
+                if (!isFinite(num) && !isNaN(num)) {
+                    updateButtonStates('infinity');
+                } else {
+                    updateButtonStates('normal');
                 }
             };
 
@@ -136,11 +146,43 @@
                     default: return;
                 }
 
-                addToHistory(expression, formatNumber(computation));
+            addToHistory(expression, formatNumber(computation));
                 currentOperand = computation.toString();
                 operation = undefined;
                 previousOperand = '';
                 resultDisplayed = true; // Đánh dấu là đã hiển thị kết quả
+            };
+            
+            const updateMemoryPanel = () => {
+                // Luôn xóa sạch nội dung cũ trước khi cập nhật
+                memoryContentEl.innerHTML = '';
+
+                if (memoryValue === 0) {
+                    // Nếu bộ nhớ trống, hiển thị lại thông báo ban đầu
+                    memoryContentEl.innerHTML = '<p class="text-center text-gray-500 dark:text-gray-400">There\'s nothing saved in memory</p>';
+                } else {
+                    // Nếu có giá trị, tạo một thẻ div để hiển thị nó
+                    const memoryItem = document.createElement('div');
+                    
+                    // --- THAY ĐỔI 1: THÊM CÁC CLASS ĐỂ CÓ HIỆU ỨNG KHI DI CHUỘT ---
+                    // Thêm cursor-pointer để biến con trỏ thành hình bàn tay
+                    // Thêm hiệu ứng hover để người dùng biết là có thể click
+                    memoryItem.classList.add('text-right', 'p-2', 'rounded-md', 'cursor-pointer', 'hover:bg-gray-300', 'dark:hover:bg-gray-700');
+                    
+                    memoryItem.innerHTML = `<p class="text-gray-900 dark:text-gray-100 text-2xl font-semibold">${formatNumber(memoryValue)}</p>`;
+                    
+                    // --- THAY ĐỔI 2: THÊM BỘ LẮNG NGHE SỰ KIỆN CLICK ---
+                    memoryItem.addEventListener('click', () => {
+                        // Khi click, gán giá trị memory cho toán hạng hiện tại
+                        currentOperand = memoryValue.toString();
+                        // Đặt cờ này để nếu người dùng bấm số mới, nó sẽ bắt đầu phép tính mới
+                        resultDisplayed = true; 
+                        // Cập nhật lại màn hình chính để hiển thị giá trị vừa được tải
+                        updateDisplay();
+                    });
+
+                    memoryContentEl.appendChild(memoryItem);
+                }
             };
 
             const handleSpecialAction = (action) => {
@@ -160,6 +202,26 @@
                     case 'reciprocal': currentOperand = (1 / current).toString(); break;
                     case 'square': currentOperand = (current * current).toString(); break;
                     case 'sqrt': currentOperand = Math.sqrt(current).toString(); break;
+                    // Thêm các case này vào trong switch của hàm handleSpecialAction
+                    case 'memory-clear': // MC
+                        memoryValue = 0;
+                        break;
+                    case 'memory-recall': // MR
+                        currentOperand = memoryValue.toString();
+                        resultDisplayed = true;
+                        break;
+                    case 'memory-store': // MS
+                        memoryValue = parseFloat(currentOperand) || 0;
+                        resultDisplayed = true;
+                        break;
+                    case 'memory-add': // M+
+                        memoryValue += parseFloat(currentOperand) || 0;
+                        resultDisplayed = true;
+                        break;
+                    case 'memory-subtract': // M-
+                        memoryValue -= parseFloat(currentOperand) || 0;
+                        resultDisplayed = true;
+                        break;
                 }
             }
             //Mục đích: Tạo ra các thẻ HTML mới và chèn chúng vào panel lịch sử (History | Memory).
@@ -228,8 +290,7 @@
              * @param {string} state - Trạng thái mong muốn: 'infinity' (khóa) hoặc 'normal' (bình thường).
              */
             const updateButtonStates = (state) => {
-                // Sử dụng CSS selector :not() để chọn tất cả các nút <button>
-                // NGOẠI TRỪ nút có data-action="clear" và data-action="clear-entry"
+                // Selector được cập nhật để bao gồm cả các nút Memory
                 const buttonsToToggle = document.querySelectorAll(
                     'button:not([data-action="clear"]):not([data-action="clear-entry"])'
                 );
@@ -238,7 +299,7 @@
 
                 buttonsToToggle.forEach(button => {
                     button.disabled = shouldDisable;
-                    
+
                     if (shouldDisable) {
                         button.classList.add('opacity-50', 'cursor-not-allowed');
                     } else {
