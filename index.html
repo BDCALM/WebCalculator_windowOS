@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <script>
+        // Cấu hình dark mode cho Tailwind
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+    <style>
+        /* Giao diện thanh cuộn đẹp hơn */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #2d3748; /* dark:gray-800 */
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4a5568; /* dark:gray-600 */
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #718096; /* dark:gray-500 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 flex items-center justify-center min-h-screen transition-colors duration-300">
+
+    <main class="w-full max-w-4xl mx-auto shadow-2xl rounded-lg bg-gray-200 dark:bg-gray-800">
+        <div class="grid grid-cols-1 md:grid-cols-3">   
+            <div class="md:col-span-2 p-4">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-4">
+                        <button id="menu-button" class="p-2 rounded-md hover:bg-gray-300 dark:hover:bg-gray-700">
+                            <i class="fa-solid fa-bars text-xl text-gray-800 dark:text-gray-200"></i>
+                        </button>
+                        <h1 id="mode-title" class="text-xl font-bold text-gray-900 dark:text-gray-100">Standard</h1>
+                    </div>
+                    <button id="history-toggle-button" class="p-2 rounded-md hover:bg-gray-300 dark:hover:bg-gray-700 md:hidden">
+                        <i class="fa-solid fa-clock-rotate-left text-xl text-gray-800 dark:text-gray-200"></i>
+                    </button>
+                </div>
+                
+                <div id="menu-panel" class="absolute bg-white dark:bg-gray-700 shadow-lg rounded-md p-2 z-10 hidden w-64">
+                     <h2 class="text-sm font-semibold text-gray-600 dark:text-gray-400 px-3 py-2">Calculator</h2>
+                     <ul>
+                        <li><a href="#" class="mode-link block px-3 py-2 rounded-md bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-200 font-semibold" data-mode="Standard"><i class="fa-solid fa-calculator fa-fw mr-2"></i> Standard</a></li>
+                        <li><a href="#" class="mode-link block px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200" data-mode="Scientific"><i class="fa-solid fa-flask fa-fw mr-2"></i> Scientific</a></li>
+                        <li><a href="#" class="mode-link block px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200" data-mode="Graphing"><i class="fa-solid fa-chart-line fa-fw mr-2"></i> Graphing</a></li>
+                        <li><a href="#" class="mode-link block px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200" data-mode="Programmer"><i class="fa-solid fa-code fa-fw mr-2"></i> Programmer</a></li>
+                        <li><a href="#" class="mode-link block px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200" data-mode="Date calculation"><i class="fa-solid fa-calendar-days fa-fw mr-2"></i> Date calculation</a></li>
+                     </ul>
+                     <hr class="my-2 border-gray-300 dark:border-gray-600">
+                      <h2 class="text-sm font-semibold text-gray-600 dark:text-gray-400 px-3 py-2">Converter</h2>
+                     <ul>
+                        <li><a href="#" class="mode-link block px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200" data-mode="Currency"><i class="fa-solid fa-money-bill-wave fa-fw mr-2"></i> Currency</a></li>
+                        <li><a href="#" class="mode-link block px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200" data-mode="Volume"><i class="fa-solid fa-cube fa-fw mr-2"></i> Volume</a></li>
+                        </ul>
+                </div>
+
+                <div class="text-right mb-4">
+                    <div id="previous-operand" class="text-gray-600 dark:text-gray-400 text-2xl h-14 overflow-hidden truncate"></div>
+                    <div id="current-operand" class="text-gray-900 dark:text-gray-100 text-6xl font-bold h-14 flex items-end justify-end overflow-hidden break-all">0</div>
+                </div>
+
+                <div class="grid grid-cols-4 gap-2">
+                    <button class="btn-op p-4 text-2xl rounded-md bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100" data-action="percent">%</button>
+                    <button class="btn-op p-4 text-2xl rounded-md bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100" data-action="clear-entry">CE</button>
+                    <button class="btn-op p-4 text-2xl rounded-md bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100" data-action="clear">C</button>
+                    <button class="btn-op p-4 text-2xl rounded-md bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100" data-action="backspace"><i class="fas fa-backspace"></i></button>
+
+                    <button class="btn-op p-4 text-2xl rounded-md bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100" data-action="reciprocal">¹/x</button>
+                    <button class="btn-op p-4 text-2xl rounded-md bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100" data-action="square">x²</button>
+                    <button class="btn-op p-4 text-2xl rounded-md bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100" data-action="sqrt">²√x</button>
+                    <button class="btn-op p-4 text-2xl rounded-md bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100" data-operator="/">÷</button>
+
+                    <button class="btn-num p-4 text-2xl rounded-md bg-white dark:bg-gray-600 hover:bg-gray-100 dark:hover:bg-gray-500 font-bold text-gray-900 dark:text-gray-100">7</button>
+                    <button class="btn-num p-4 text-2xl rounded-md bg-white dark:bg-gray-600 hover:bg-gray-100 dark:hover:bg-gray-500 font-bold text-gray-900 dark:text-gray-100">8</button>
+                    <button class="btn-num p-4 text-2xl rounded-md bg-white dark:bg-gray-600 hover:bg-gray-100 dark:hover:bg-gray-500 font-bold text-gray-900 dark:text-gray-100">9</button>
+                    <button class="btn-op p-4 text-2xl rounded-md bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100" data-operator="*">×</button>
+
+                    <button class="btn-num p-4 text-2xl rounded-md bg-white dark:bg-gray-600 hover:bg-gray-100 dark:hover:bg-gray-500 font-bold text-gray-900 dark:text-gray-100">4</button>
+                    <button class="btn-num p-4 text-2xl rounded-md bg-white dark:bg-gray-600 hover:bg-gray-100 dark:hover:bg-gray-500 font-bold text-gray-900 dark:text-gray-100">5</button>
+                    <button class="btn-num p-4 text-2xl rounded-md bg-white dark:bg-gray-600 hover:bg-gray-100 dark:hover:bg-gray-500 font-bold text-gray-900 dark:text-gray-100">6</button>
+                    <button class="btn-op p-4 text-2xl rounded-md bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100" data-operator="-">−</button>
+
+                    <button class="btn-num p-4 text-2xl rounded-md bg-white dark:bg-gray-600 hover:bg-gray-100 dark:hover:bg-gray-500 font-bold text-gray-900 dark:text-gray-100">1</button>
+                    <button class="btn-num p-4 text-2xl rounded-md bg-white dark:bg-gray-600 hover:bg-gray-100 dark:hover:bg-gray-500 font-bold text-gray-900 dark:text-gray-100">2</button>
+                    <button class="btn-num p-4 text-2xl rounded-md bg-white dark:bg-gray-600 hover:bg-gray-100 dark:hover:bg-gray-500 font-bold text-gray-900 dark:text-gray-100">3</button>
+                    <button class="btn-op p-4 text-2xl rounded-md bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100" data-operator="+">+</button>
+
+                    <button class="btn-op p-4 text-2xl rounded-md bg-white dark:bg-gray-600 hover:bg-gray-100 dark:hover:bg-gray-500 font-bold text-gray-900 dark:text-gray-100" data-action="negate">±</button>
+                    <button class="btn-num p-4 text-2xl rounded-md bg-white dark:bg-gray-600 hover:bg-gray-100 dark:hover:bg-gray-500 font-bold text-gray-900 dark:text-gray-100">0</button>
+                    <button class="btn-num p-4 text-2xl rounded-md bg-white dark:bg-gray-600 hover:bg-gray-100 dark:hover:bg-gray-500 font-bold text-gray-900 dark:text-gray-100">.</button>
+                    <button class="p-4 text-2xl rounded-md bg-blue-500 hover:bg-blue-600 text-white" data-action="equals">=</button>
+                </div>
+            </div>
+            
+            <div id="history-panel" class="md:col-span-1 border-l border-gray-300 dark:border-gray-700 p-4 hidden md:flex flex-col">
+                <div class="flex border-b border-gray-300 dark:border-gray-700 mb-4">
+                    <button class="history-tab-button flex-1 py-2 text-center font-semibold text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400" data-tab="history">History</button>
+                    <button class="history-tab-button flex-1 py-2 text-center font-semibold text-gray-500 dark:text-gray-400" data-tab="memory">Memory</button>
+                </div>
+                
+                <div id="history-content" class="flex-grow overflow-y-auto">
+                    <p class="text-center text-gray-500 dark:text-gray-400">There's no history yet</p>
+                </div>
+
+                <div id="memory-content" class="flex-grow overflow-y-auto hidden">
+                    <p class="text-center text-gray-500 dark:text-gray-400">There's nothing saved in memory</p>
+                </div>
+
+                <button id="clear-history-button" class="mt-4 p-2 rounded-md hover:bg-gray-300 dark:hover:bg-gray-700">
+                    <i class="fas fa-trash text-gray-700 dark:text-gray-300"></i>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const currentOperandEl = document.getElementById('current-operand');
+            const previousOperandEl = document.getElementById('previous-operand');
+            const historyContentEl = document.getElementById('history-content');
+            const clearHistoryButton = document.getElementById('clear-history-button');
+
+            let currentOperand = '';
+            let previousOperand = '';
+            let operation = undefined;
+            // *** BIẾN QUAN TRỌNG: Đánh dấu kết quả vừa được hiển thị ***
+            // Giúp giải quyết vấn đề: sau khi có kết quả, bấm số mới sẽ bắt đầu phép tính mới.
+            let resultDisplayed = false;
+
+            const updateDisplay = () => {
+                currentOperandEl.innerText = formatNumber(currentOperand) || '0';
+                if (operation != null) {
+                    previousOperandEl.innerText = `${formatNumber(previousOperand)} ${getDisplayOperator(operation)}`;
+                } else {
+                    previousOperandEl.innerText = '';
+                }
+            };
+
+            const formatNumber = (number) => {
+                if (number === '' || number == null) return '';
+                const stringNumber = number.toString();
+                const integerDigits = parseFloat(stringNumber.split('.')[0]);
+                const decimalDigits = stringNumber.split('.')[1];
+                let integerDisplay;
+                if (isNaN(integerDigits)) {
+                    integerDisplay = '';
+                } else {
+                    integerDisplay = integerDigits.toLocaleString('en', { maximumFractionDigits: 0 });
+                }
+                if (decimalDigits != null) {
+                    return `${integerDisplay}.${decimalDigits}`;
+                } else {
+                    return integerDisplay;
+                }
+            };
+            
+            const getDisplayOperator = (op) => {
+                switch(op) {
+                    case '*': return 'x';
+                    case '/': return '÷';
+                    default: return op;
+                }
+            };
+
+            const clear = () => {
+                currentOperand = '';
+                previousOperand = '';
+                operation = undefined;
+                resultDisplayed = false;
+                updateDisplay();
+            };
+
+            const clearEntry = () => {
+                currentOperand = '';
+                updateDisplay();
+            };
+
+            const backspace = () => {
+                currentOperand = currentOperand.toString().slice(0, -1);
+                updateDisplay();
+            };
+            
+            const appendNumber = (number) => {
+                // *** LOGIC CHÍNH ĐÂY ***
+                // Nếu kết quả vừa được hiển thị và người dùng bấm một số mới,
+                // hãy xóa trạng thái cũ và bắt đầu một phép tính hoàn toàn mới.
+                if (resultDisplayed) {
+                    currentOperand = '';
+                    resultDisplayed = false;
+                }
+
+                if (number === '.' && currentOperand.includes('.')) return;
+                currentOperand = currentOperand.toString() + number.toString();
+            };
+
+            const chooseOperation = (op) => {
+                if (currentOperand === '' && previousOperand === '') return;
+                if (currentOperand === '' && previousOperand !== '') {
+                    operation = op;
+                    updateDisplay();
+                    return;
+                }
+                if (previousOperand !== '') {
+                    calculate();
+                }
+                operation = op;
+                previousOperand = currentOperand;
+                currentOperand = '';
+                resultDisplayed = false;
+            };
+
+            const calculate = () => {
+                let computation;
+                const prev = parseFloat(previousOperand);
+                const current = parseFloat(currentOperand);
+                if (isNaN(prev) || isNaN(current)) return;
+                
+                const expression = `${formatNumber(previousOperand)} ${getDisplayOperator(operation)} ${formatNumber(currentOperand)} =`;
+
+                switch (operation) {
+                    case '+': computation = prev + current; break;
+                    case '-': computation = prev - current; break;
+                    case '*': computation = prev * current; break;
+                    case '/': computation = prev / current; break;
+                    default: return;
+                }
+
+                addToHistory(expression, formatNumber(computation));
+                currentOperand = computation.toString();
+                operation = undefined;
+                previousOperand = '';
+                resultDisplayed = true; // Đánh dấu là đã hiển thị kết quả
+            };
+
+            const handleSpecialAction = (action) => {
+                const current = parseFloat(currentOperand);
+                if (isNaN(current) && action !== 'clear' && action !== 'clear-entry') return;
+
+                switch(action) {
+                    case 'clear': clear(); break;
+                    case 'clear-entry': clearEntry(); break;
+                    case 'backspace': backspace(); break;
+                    case 'equals': 
+                        if (operation == null || previousOperand === '') return;
+                        calculate();
+                        break;
+                    case 'negate': currentOperand = (current * -1).toString(); break;
+                    case 'percent': currentOperand = (current / 100).toString(); break;
+                    case 'reciprocal': currentOperand = (1 / current).toString(); break;
+                    case 'square': currentOperand = (current * current).toString(); break;
+                    case 'sqrt': currentOperand = Math.sqrt(current).toString(); break;
+                }
+            }
+            
+            const addToHistory = (expression, result) => {
+                const initialMessage = historyContentEl.querySelector('p');
+                if (initialMessage) {
+                    initialMessage.remove();
+                }
+                const historyItem = document.createElement('div');
+                historyItem.classList.add('text-right', 'p-2', 'rounded-md', 'hover:bg-gray-300', 'dark:hover:bg-gray-700', 'cursor-pointer');
+                historyItem.innerHTML = `
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">${expression}</p>
+                    <p class="text-gray-900 dark:text-gray-100 text-2xl font-semibold">${result}</p>
+                `;
+                historyContentEl.prepend(historyItem);
+            };
+
+            // Event Listeners
+            document.querySelectorAll('.btn-num').forEach(button => {
+                button.addEventListener('click', () => {
+                    appendNumber(button.innerText);
+                    updateDisplay();
+                });
+            });
+
+            document.querySelectorAll('.btn-op').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const target = e.target.closest('button');
+                    if (target.dataset.operator) {
+                        chooseOperation(target.dataset.operator);
+                    } else if (target.dataset.action) {
+                        handleSpecialAction(target.dataset.action);
+                    }
+                    updateDisplay();
+                });
+            });
+
+            document.querySelector('[data-action="equals"]').addEventListener('click', () => {
+                handleSpecialAction('equals');
+                updateDisplay();
+            });
+            
+            clearHistoryButton.addEventListener('click', () => {
+                historyContentEl.innerHTML = '<p class="text-center text-gray-500 dark:text-gray-400">There\'s no history yet</p>';
+            });
+
+            // Menu, History Panel Toggle Logic
+            const menuButton = document.getElementById('menu-button');
+            const menuPanel = document.getElementById('menu-panel');
+            const historyToggleButton = document.getElementById('history-toggle-button');
+            const historyPanel = document.getElementById('history-panel');
+
+            menuButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                menuPanel.classList.toggle('hidden');
+            });
+
+            historyToggleButton.addEventListener('click', () => {
+                historyPanel.classList.toggle('hidden');
+                historyPanel.classList.toggle('flex');
+            });
+            
+            // Close menu if clicked outside
+            document.addEventListener('click', (e) => {
+                if (!menuPanel.contains(e.target) && !menuButton.contains(e.target)) {
+                    menuPanel.classList.add('hidden');
+                }
+            });
+
+            // History/Memory Tabs
+            const tabs = document.querySelectorAll('.history-tab-button');
+            const historyContent = document.getElementById('history-content');
+            const memoryContent = document.getElementById('memory-content');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => {
+                        t.classList.remove('text-blue-600', 'dark:text-blue-400', 'border-b-2', 'border-blue-600', 'dark:border-blue-400');
+                        t.classList.add('text-gray-500', 'dark:text-gray-400');
+                    });
+                    tab.classList.add('text-blue-600', 'dark:text-blue-400', 'border-b-2', 'border-blue-600', 'dark:border-blue-400');
+                    tab.classList.remove('text-gray-500', 'dark:text-gray-400');
+                    
+                    if(tab.dataset.tab === 'history') {
+                        historyContent.classList.remove('hidden');
+                        memoryContent.classList.add('hidden');
+                        clearHistoryButton.style.display = 'block';
+                    } else {
+                        historyContent.classList.add('hidden');
+                        memoryContent.classList.remove('hidden');
+                        clearHistoryButton.style.display = 'none'; // Thường thì memory có các nút riêng
+                    }
+                });
+            });
+
+             // Mode switching logic (Stub)
+             //Stub: Chuyển đổi chế độ (chưa triển khai giao diện cụ thể)
+            document.querySelectorAll('.mode-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const newMode = e.target.closest('a').dataset.mode;
+                    //document.getElementById('mode-title').innerText = newMode; you will need this later when you implement different modes
+                    if (newMode === 'Standard') {
+                        // Default mode
+                        return;
+                    }
+                    
+                    // Reset active styles  
+                    /*document.querySelectorAll('.mode-link').forEach(l => {
+                        l.classList.remove('bg-blue-100', 'dark:bg-blue-800', 'text-blue-700', 'dark:text-blue-200', 'font-semibold');
+                         l.classList.add('hover:bg-gray-100', 'dark:hover:bg-gray-600', 'text-gray-800', 'dark:text-gray-200');
+                    });
+                    */
+
+                    // Set active style for clicked link
+                    /* e.target.closest('a').classList.add('bg-blue-100', 'dark:bg-blue-800', 'text-blue-700', 'dark:text-blue-200', 'font-semibold');
+                     e.target.closest('a').classList.remove('hover:bg-gray-100', 'dark:hover:bg-gray-600', 'text-gray-800', 'dark:text-gray-200');
+                    */
+
+                    menuPanel.classList.add('hidden');
+                    alert(`Switched to ${newMode} mode. UI for this mode needs to be implemented.`);
+                    // In a real app, you would dynamically change the calculator's button layout here.
+                });
+            });
+
+            clear(); // Initialize
+        });
+    </script>
+</body>
+</html>
