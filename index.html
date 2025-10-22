@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Calculator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="calculator">
+        <div class="display">
+            <div id="previous-operand" class="previous-operand"></div>
+            <div id="current-operand" class="current-operand">0</div>
+        </div>
+        <div class="buttons">
+            <button class="btn btn-clear" onclick="calculator.clear()">C</button>
+            <button class="btn btn-delete" onclick="calculator.delete()">DEL</button>
+            <button class="btn btn-operator" onclick="calculator.chooseOperation('÷')">÷</button>
+            <button class="btn btn-operator" onclick="calculator.chooseOperation('×')">×</button>
+            
+            <button class="btn btn-number" onclick="calculator.appendNumber('7')">7</button>
+            <button class="btn btn-number" onclick="calculator.appendNumber('8')">8</button>
+            <button class="btn btn-number" onclick="calculator.appendNumber('9')">9</button>
+            <button class="btn btn-operator" onclick="calculator.chooseOperation('-')">-</button>
+            
+            <button class="btn btn-number" onclick="calculator.appendNumber('4')">4</button>
+            <button class="btn btn-number" onclick="calculator.appendNumber('5')">5</button>
+            <button class="btn btn-number" onclick="calculator.appendNumber('6')">6</button>
+            <button class="btn btn-operator" onclick="calculator.chooseOperation('+')">+</button>
+            
+            <button class="btn btn-number" onclick="calculator.appendNumber('1')">1</button>
+            <button class="btn btn-number" onclick="calculator.appendNumber('2')">2</button>
+            <button class="btn btn-number" onclick="calculator.appendNumber('3')">3</button>
+            <button class="btn btn-equals" onclick="calculator.compute()" style="grid-row: span 2">=</button>
+            
+            <button class="btn btn-number" onclick="calculator.appendNumber('0')" style="grid-column: span 2">0</button>
+            <button class="btn btn-number" onclick="calculator.appendNumber('.')">.</button>
+        </div>
+    </div>
+    <script src="calculator.js"></script>
+</body>
+</html>
