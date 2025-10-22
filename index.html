@@ -69,6 +69,7 @@
                 </div>
 
                 <div class="grid grid-cols-4 gap-2">
+                    <!--Operator and special buttons-->
                     <button class="btn-op p-4 text-2xl rounded-md bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100" data-action="percent">%</button>
                     <button class="btn-op p-4 text-2xl rounded-md bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100" data-action="clear-entry">CE</button>
                     <button class="btn-op p-4 text-2xl rounded-md bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100" data-action="clear">C</button>
@@ -78,7 +79,8 @@
                     <button class="btn-op p-4 text-2xl rounded-md bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100" data-action="square">x²</button>
                     <button class="btn-op p-4 text-2xl rounded-md bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100" data-action="sqrt">²√x</button>
                     <button class="btn-op p-4 text-2xl rounded-md bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100" data-operator="/">÷</button>
-
+                    
+                    <!--Number buttons-->
                     <button class="btn-num p-4 text-2xl rounded-md bg-white dark:bg-gray-600 hover:bg-gray-100 dark:hover:bg-gray-500 font-bold text-gray-900 dark:text-gray-100">7</button>
                     <button class="btn-num p-4 text-2xl rounded-md bg-white dark:bg-gray-600 hover:bg-gray-100 dark:hover:bg-gray-500 font-bold text-gray-900 dark:text-gray-100">8</button>
                     <button class="btn-num p-4 text-2xl rounded-md bg-white dark:bg-gray-600 hover:bg-gray-100 dark:hover:bg-gray-500 font-bold text-gray-900 dark:text-gray-100">9</button>
@@ -124,43 +126,65 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // Lấy các phần tử HTML quan trọng và gán vào hằng số để dễ sử dụng
             const currentOperandEl = document.getElementById('current-operand');
             const previousOperandEl = document.getElementById('previous-operand');
             const historyContentEl = document.getElementById('history-content');
             const clearHistoryButton = document.getElementById('clear-history-button');
 
-            let currentOperand = '';
-            let previousOperand = '';
-            let operation = undefined;
+            // Các biến trạng thái - "bộ nhớ tạm" của máy tính
+            let currentOperand = '';    // Số đang được nhập hoặc kết quả của phép tính
+            let previousOperand = '';   // Số hạng đầu tiên của phép tính
+            let operation = undefined;  // Phép toán được chọn (+, -, *, /)
+
             // *** BIẾN QUAN TRỌNG: Đánh dấu kết quả vừa được hiển thị ***
             // Giúp giải quyết vấn đề: sau khi có kết quả, bấm số mới sẽ bắt đầu phép tính mới.
             let resultDisplayed = false;
 
             const updateDisplay = () => {
+                // --- Phần này vẫn như cũ ---
                 currentOperandEl.innerText = formatNumber(currentOperand) || '0';
                 if (operation != null) {
                     previousOperandEl.innerText = `${formatNumber(previousOperand)} ${getDisplayOperator(operation)}`;
                 } else {
                     previousOperandEl.innerText = '';
                 }
+
+                // --- PHẦN LOGIC MỚI ĐƯỢC THÊM VÀO ---
+                const num = parseFloat(currentOperand);
+                
+                // Hàm isFinite() trả về false cho Infinity, -Infinity và NaN.
+                // Chúng ta chỉ muốn vô hiệu hóa nút khi là Infinity,
+                // nên cần thêm điều kiện !isNaN(num) để loại trừ trường hợp màn hình trống (là NaN).
+                if (!isFinite(num) && !isNaN(num)) {
+                    toggleOperatorButtons(true); // Vô hiệu hóa các nút toán tử
+                } else {
+                    toggleOperatorButtons(false); // Kích hoạt lại các nút
+                }
             };
 
             const formatNumber = (number) => {
+                // Bước 1: Xử lý các trường hợp đầu vào rỗng hoặc không hợp lệ
                 if (number === '' || number == null) return '';
-                const stringNumber = number.toString();
-                const integerDigits = parseFloat(stringNumber.split('.')[0]);
-                const decimalDigits = stringNumber.split('.')[1];
-                let integerDisplay;
-                if (isNaN(integerDigits)) {
-                    integerDisplay = '';
-                } else {
-                    integerDisplay = integerDigits.toLocaleString('en', { maximumFractionDigits: 0 });
+               // if (number === '.') {number = 0; return '0';}
+                const num = parseFloat(number);
+            
+                // Bước 2: Đặt ngưỡng để quyết định khi nào dùng ký hiệu khoa học
+                // Nếu lớn hơn 1 nghìn tỷ hoặc nhỏ hơn 0.000001
+                const upperThreshold = 1e12; 
+                const lowerThreshold = 1e-6;
+
+                // Bước 3: Kiểm tra xem số có nằm ngoài ngưỡng hay không
+                if (num !== 0 && (Math.abs(num) >= upperThreshold || Math.abs(num) < lowerThreshold)) {
+                    // Nếu là số rất lớn hoặc rất nhỏ, dùng toExponential() để hiển thị dạng e^
+                    // toExponential(6) sẽ làm tròn đến 6 chữ số sau dấu phẩy, cho độ chính xác tốt
+                    return num.toExponential(6);
                 }
-                if (decimalDigits != null) {
-                    return `${integerDisplay}.${decimalDigits}`;
-                } else {
-                    return integerDisplay;
-                }
+
+                // Bước 4: Nếu là số thông thường, dùng toLocaleString để định dạng
+                // Đây là cách an toàn và chuẩn xác hơn nhiều so với việc cắt chuỗi thủ công.
+                // maximumFractionDigits giúp giới hạn số chữ số thập phân để không làm tràn màn hình.
+                return num.toLocaleString('en-US', { maximumFractionDigits: 10 });
             };
             
             const getDisplayOperator = (op) => {
@@ -189,6 +213,7 @@
                 updateDisplay();
             };
             
+            //Được gọi khi người dùng nhấn một nút số (0-9) hoặc dấu chấm (.).
             const appendNumber = (number) => {
                 // *** LOGIC CHÍNH ĐÂY ***
                 // Nếu kết quả vừa được hiển thị và người dùng bấm một số mới,
@@ -218,6 +243,7 @@
                 resultDisplayed = false;
             };
 
+            //Mục đích: Thực hiện phép tính khi người dùng nhấn dấu = hoặc khi một phép toán mới được chọn.
             const calculate = () => {
                 let computation;
                 const prev = parseFloat(previousOperand);
@@ -260,7 +286,7 @@
                     case 'sqrt': currentOperand = Math.sqrt(current).toString(); break;
                 }
             }
-            
+            //Mục đích: Tạo ra các thẻ HTML mới và chèn chúng vào panel lịch sử (History | Memory).
             const addToHistory = (expression, result) => {
                 const initialMessage = historyContentEl.querySelector('p');
                 if (initialMessage) {
@@ -275,6 +301,7 @@
                 historyContentEl.prepend(historyItem);
             };
 
+        //Kết nối - Gắn Sự kiện
             // Event Listeners
             document.querySelectorAll('.btn-num').forEach(button => {
                 button.addEventListener('click', () => {
@@ -319,7 +346,27 @@
                 historyPanel.classList.toggle('hidden');
                 historyPanel.classList.toggle('flex');
             });
-            
+            //Toggle buttons to avoid the user clicking number buttons when current number is Inf
+            const toggleOperatorButtons = (disabled) => {
+                // Chọn tất cả các nút là toán tử hoặc có chức năng tính toán đặc biệt
+                const buttonsToToggle = document.querySelectorAll(
+                    '[data-operator], [data-action="equals"], [data-action="percent"], [data-action="reciprocal"], [data-action="square"], [data-action="sqrt"], [data-action="negate"], [data-action="back-space"]'
+                );
+
+                buttonsToToggle.forEach(button => {
+                    // Vô hiệu hóa hoặc kích hoạt lại nút
+                    button.disabled = disabled;
+                    
+                    if (disabled) {
+                        // Thêm class của Tailwind để làm mờ nút và đổi kiểu con trỏ
+                        button.classList.add('opacity-50', 'cursor-not-allowed');
+                    } else {
+                        // Xóa các class đó để nút trở lại bình thường
+                        button.classList.remove('opacity-50', 'cursor-not-allowed');
+                    }
+                });
+            };
+
             // Close menu if clicked outside
             document.addEventListener('click', (e) => {
                 if (!menuPanel.contains(e.target) && !menuButton.contains(e.target)) {
